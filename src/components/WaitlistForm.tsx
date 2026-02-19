@@ -20,11 +20,11 @@ const WaitlistForm = () => {
     setLoading(true);
     setError("");
 
-    const { error } = await supabase.from("waitlist").insert([
+    const { error } = await supabase.from("pro_waitlist").insert([
       {
         email,
         role,
-        feature,
+        interested_feature: feature,
       },
     ]);
 
