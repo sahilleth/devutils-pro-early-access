@@ -1,4 +1,5 @@
 import { Check, X } from "lucide-react";
+import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll";
 
 const plans = [
   {
@@ -39,14 +40,20 @@ const plans = [
 ];
 
 const PricingSection = () => {
+  const { ref, isVisible } = useAnimateOnScroll(0.1);
+
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <section id="pricing" className="py-24 px-4">
+    <section id="pricing" className="py-24 px-4" ref={ref}>
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-16 space-y-4">
+        <div
+          className={`text-center mb-16 space-y-4 transition-all duration-700 ${
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
+        >
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
             Simple, transparent pricing
           </h2>
@@ -56,14 +63,17 @@ const PricingSection = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {plans.map((plan) => (
+          {plans.map((plan, i) => (
             <div
               key={plan.name}
-              className={`relative rounded-xl border p-8 transition-all duration-300 ${
+              className={`relative rounded-2xl border p-8 transition-all duration-600 ${
                 plan.highlighted
                   ? "border-primary/40 bg-card glow-border"
                   : "border-border bg-card/50"
+              } ${
+                isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-10 scale-95"
               }`}
+              style={{ transitionDelay: isVisible ? `${i * 150 + 200}ms` : "0ms" }}
             >
               {plan.badge && (
                 <div className="absolute -top-3 left-6 px-3 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-full">
@@ -121,7 +131,12 @@ const PricingSection = () => {
           ))}
         </div>
 
-        <p className="text-center text-muted-foreground text-sm mt-8">
+        <p
+          className={`text-center text-muted-foreground text-sm mt-8 transition-all duration-700 ${
+            isVisible ? "opacity-100" : "opacity-0"
+          }`}
+          style={{ transitionDelay: isVisible ? "600ms" : "0ms" }}
+        >
           No ads. No tracking. Cancel anytime.
         </p>
       </div>

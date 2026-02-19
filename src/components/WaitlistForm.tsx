@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
+import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll";
 
 const WaitlistForm = () => {
   const [submitted, setSubmitted] = useState(false);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
   const [feature, setFeature] = useState("");
+  const { ref, isVisible } = useAnimateOnScroll(0.1);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    // Mock submission
     setSubmitted(true);
   };
 
@@ -32,8 +33,12 @@ const WaitlistForm = () => {
   }
 
   return (
-    <section id="waitlist" className="py-24 px-4">
-      <div className="max-w-md mx-auto">
+    <section id="waitlist" className="py-24 px-4" ref={ref}>
+      <div
+        className={`max-w-md mx-auto transition-all duration-700 ${
+          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+        }`}
+      >
         <div className="text-center mb-10 space-y-4">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
             Reserve your spot
@@ -45,9 +50,8 @@ const WaitlistForm = () => {
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 rounded-xl border border-border bg-card/50 p-6 sm:p-8"
+          className="space-y-4 rounded-2xl border border-border bg-card/50 p-6 sm:p-8"
         >
-          {/* Email */}
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
               Email <span className="text-primary">*</span>
@@ -63,7 +67,6 @@ const WaitlistForm = () => {
             />
           </div>
 
-          {/* Role */}
           <div className="space-y-2">
             <label htmlFor="role" className="text-sm font-medium">
               Role
@@ -82,7 +85,6 @@ const WaitlistForm = () => {
             </select>
           </div>
 
-          {/* Feature */}
           <div className="space-y-2">
             <label htmlFor="feature" className="text-sm font-medium">
               What feature excites you most? <span className="text-muted-foreground">(optional)</span>
