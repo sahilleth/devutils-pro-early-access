@@ -2,18 +2,44 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll";
+import { supabase } from "@/lib/supabase";
 
 const WaitlistForm = () => {
   const [submitted, setSubmitted] = useState(false);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
   const [feature, setFeature] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const { ref, isVisible } = useAnimateOnScroll(0.1);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
+
+    setLoading(true);
+    setError("");
+
+    const { error } = await supabase.from("waitlist").insert([
+      {
+        email,
+        role,
+        feature,
+      },
+    ]);
+
+    if (error) {
+      if (error.message.includes("duplicate")) {
+        setError("You're already on the waitlist 😉");
+      } else {
+        setError("Something went wrong. Try again.");
+      }
+      setLoading(false);
+      return;
+    }
+
     setSubmitted(true);
+    setLoading(false);
   };
 
   if (submitted) {
@@ -25,7 +51,7 @@ const WaitlistForm = () => {
           </div>
           <h2 className="text-2xl font-bold">You're in! 🎉</h2>
           <p className="text-muted-foreground">
-            We'll email you when Pro launches. Keep building awesome things.
+            We'll email you when Pro launches.
           </p>
         </div>
       </section>
@@ -53,29 +79,25 @@ const WaitlistForm = () => {
           className="space-y-4 rounded-2xl border border-border bg-card/50 p-6 sm:p-8"
         >
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
+            <label className="text-sm font-medium">
               Email <span className="text-primary">*</span>
             </label>
             <input
-              id="email"
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="dev@example.com"
-              className="w-full h-11 rounded-lg border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
+              className="w-full h-11 rounded-lg border border-border bg-background px-4 text-sm focus:ring-2 focus:ring-ring"
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="role" className="text-sm font-medium">
-              Role
-            </label>
+            <label className="text-sm font-medium">Role</label>
             <select
-              id="role"
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full h-11 rounded-lg border border-border bg-background px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-shadow appearance-none"
+              className="w-full h-11 rounded-lg border border-border bg-background px-4 text-sm"
             >
               <option value="">Select your role</option>
               <option value="developer">Developer</option>
@@ -86,26 +108,30 @@ const WaitlistForm = () => {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="feature" className="text-sm font-medium">
-              What feature excites you most? <span className="text-muted-foreground">(optional)</span>
+            <label className="text-sm font-medium">
+              What feature excites you most? (optional)
             </label>
             <input
-              id="feature"
               type="text"
               value={feature}
               onChange={(e) => setFeature(e.target.value)}
-              placeholder="e.g. Bulk mode, API access..."
-              className="w-full h-11 rounded-lg border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
+              placeholder="Bulk mode, API access..."
+              className="w-full h-11 rounded-lg border border-border bg-background px-4 text-sm"
             />
           </div>
+
+          {error && (
+            <p className="text-sm text-red-500 text-center">{error}</p>
+          )}
 
           <Button
             type="submit"
             variant="hero"
             size="lg"
             className="w-full text-base py-6 mt-2"
+            disabled={loading}
           >
-            Reserve My $3 Spot
+            {loading ? "Reserving..." : "Reserve My $3 Spot"}
           </Button>
 
           <p className="text-center text-xs text-muted-foreground pt-1">
